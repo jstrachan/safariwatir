@@ -260,6 +260,12 @@ return selected;|
       
     def append_text_input(value, element = @element)
       sleep typing_lag
+      # deal with multi line text by encoding it with backquote
+      # TODO we might wanna send other special characters this way maybe?
+      if value == "\n"
+        value = "\\n"
+      end
+
       execute(element.operate do 
 %|element.value += '#{value}';
 dispatchOnChange(element);
