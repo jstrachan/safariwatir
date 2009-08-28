@@ -185,6 +185,18 @@ module Watir
         @scripter.get_text_for(self)
       end
 
+      def text=(value)
+        value = value.to_s
+        @scripter.set_text_for(value, self)
+        @scripter.blur(self)
+      end
+
+      def html=(value)
+        value = value.to_s
+        @scripter.set_html_for(value, self)
+        @scripter.blur(self)
+      end
+
       def speak
         @scripter.speak_text_of(self)
       end      
@@ -194,6 +206,18 @@ module Watir
       include Clickable
       
       def tag; "IMG"; end
+    end
+    
+    class Body < ContentElement
+      def tag; "BODY"; end
+    end
+    
+    class NestedIFrame < ContentElement
+      def tag; "IFRAME"; end
+
+      def initialize(scripter, id_value)
+        @scripter = scripter.for_nested_iframe(id_value)
+      end
     end
     
     class Button < InputElement
@@ -419,6 +443,10 @@ module Watir
 
     # Elements
     
+    def body(how, what)
+      Body.new(scripter, how, what)
+    end
+
     def button(how, what)
       Button.new(scripter, how, what)
     end
@@ -445,6 +473,11 @@ module Watir
 
     def frame(name)
       Frame.new(scripter, name)
+    end
+
+
+    def nested_iframe(id_value)
+      NestedIFrame.new(scripter, id_value)
     end
     
     def image(how, what)

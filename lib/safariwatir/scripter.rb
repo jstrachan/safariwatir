@@ -77,6 +77,17 @@ if (element) {
     end
   end
 
+  class NestedIFrameJavaScripter < JavaScripter # :nodoc:
+    def initialize(value)
+      @id = value
+    end
+    
+    def wrap(script)
+      script.gsub! "document", "document.getElementById('#{@id}').contentDocument"
+      super(script)
+    end
+  end
+
   class TableJavaScripter < JavaScripter # :nodoc:
     def_init :cell
     
@@ -145,6 +156,19 @@ if (element) {
     def get_html_for(element = @element)
       execute(element.operate { %|return element.innerHTML| }, element)
     end
+
+    def set_text_for(value, element = @element)
+      #sleep typing_lag
+
+      execute(element.operate { %|element.innerText = '#{value}'; return element.innerText| }, element)
+    end
+
+    def set_html_for(value, element = @element)
+      #sleep typing_lag
+
+      execute(element.operate { %|element.innerHTML = '#{value}'| }, element)
+    end
+
 
     def operate_by_table_cell(element = @element)      
 %|var element = document;
@@ -504,6 +528,10 @@ end tell|, true)
       AppleScripter.new(FrameJavaScripter.new(element))
     end
 
+    def for_nested_iframe(value)
+      AppleScripter.new(NestedIFrameJavaScripter.new(value))
+    end
+
     def speak_value_of(element = @element)
       speak(get_value_for(element))
     end
@@ -537,6 +565,7 @@ SCRIPT`
 
     def execute(script, element = nil)
       response = eval_js(script)
+      puts "Evaluated script '#{script}' and got response '#{response}'"
       case response
         when NO_RESPONSE
           nil
@@ -606,7 +635,7 @@ return "#{no_redirect_flag}"|)
     end
     
     def eval_js(script)
-      @app.do_JavaScript(js.wrap(script), :in => @document)      
+      @app.do_JavaScript(js.wrap(script), :in => @document)
     end
   end # class AppleScripter
 end
